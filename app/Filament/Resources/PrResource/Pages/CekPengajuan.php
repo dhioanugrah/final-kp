@@ -17,4 +17,11 @@ class CekPengajuan extends Page
     {
         $this->records = PrDetail::where('pr_id', $record)->get();
     }
+
+    public function getViewData(): array
+    {
+        return [
+            'records' => $this->records,
+        ];
+    }
 }
