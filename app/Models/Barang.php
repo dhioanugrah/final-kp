@@ -28,4 +28,11 @@ class Barang extends Model
     {
         return $this->hasMany(PrDetail::class, 'kode_barang', 'kode_barang');
     }
+
+    public function prPengajuan()
+    {
+        return $this->hasMany(PrPengajuan::class, 'kode_barang', 'kode_barang');
+    }
 }
+
+

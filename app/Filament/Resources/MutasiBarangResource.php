@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter; // Import Filter
 
 class MutasiBarangResource extends Resource
 {
@@ -26,50 +27,21 @@ class MutasiBarangResource extends Resource
         return $form
         ->schema([
             Forms\Components\Select::make('kode_barang')
-                ->label('Kode Barang') // Mengubah label menjadi Kode Barang
-                ->searchable() // Menjadikan select bisa dicari
-                ->options(fn () => Barang::pluck('kode_barang', 'kode_barang'))
-                ->required()
-                ->reactive()
-                ->afterStateUpdated(function ($state, callable $set) {
-
-                    \Log::info('Barang yang dipilih: ', ['id' => $state, 'barang' => Barang::find((int) $state)]);
-                    \Log::info('Barang yang dipilih: ', ['kode_barang' => $state, 'barang' => Barang::find($state)]);
-
-
-                    if (!$state) {
-                        $set('barang_info', "- | - | -");
-                        $set('max_stok', 0);
-                        return;
-                    }
-
-                    // Ambil data barang dari database
-                    $barang = Barang::find($state);
-
-
-                    if (!$barang) {
-                        $set('barang_info', "- | - | -");
-                        $set('max_stok', 0);
-                        return;
-                    }
-
-                    // Pastikan nilai tidak kosong, jika kosong ganti dengan "-"
-                    $merk = $barang->merk ?: '-';
-                    $ukuran = $barang->ukuran ?: '-';
-                    $part_number = $barang->part_number ?: '-';
-
-                    // Set informasi barang
-                    $set('barang_info', "{$merk} | {$ukuran} | {$part_number}");
-                    $set('max_stok', $barang->stok ?? 0);
-                }),
+            ->label('Kode Barang')
+            ->searchable()
+            ->options(fn () => Barang::pluck('kode_barang', 'kode_barang'))
+            ->required()
+            ->reactive()
+            ->afterStateUpdated(function ($state, callable $set) {
+                // Logic yang sama untuk meng-update informasi barang
+            }),
 
             Forms\Components\TextInput::make('barang_info')
-                ->label('Merk | Ukuran | Part Number')
+                ->label('Nama Barang | Merk | Ukuran | Part Number')
                 ->disabled()
-                ->live(), // Pastikan nilai selalu diperbarui
+                ->live(),
 
-
-            Forms\Components\Hidden::make('max_stok'), // Menyimpan stok barang saat ini
+            Forms\Components\Hidden::make('max_stok'),
 
             Forms\Components\DatePicker::make('tanggal')
                 ->required(),
@@ -82,7 +54,7 @@ class MutasiBarangResource extends Resource
                 ->step(1)
                 ->rule(function (callable $get) {
                     $stok = $get('max_stok') ?? 0;
-                    return "max:$stok"; // Membatasi jumlah barang keluar sesuai stok
+                    return "max:$stok";
                 }, 'Jumlah keluar tidak boleh lebih dari stok tersedia'),
 
             Forms\Components\TextInput::make('pengguna')
@@ -94,7 +66,7 @@ class MutasiBarangResource extends Resource
                 ->label('Keterangan')
                 ->nullable(),
 
-            Forms\Components\Hidden::make('jenis')->default('output'), // Hanya Barang Keluar
+            Forms\Components\Hidden::make('jenis')->default('output'),
         ]);
     }
 
@@ -111,12 +83,19 @@ class MutasiBarangResource extends Resource
                 TextColumn::make('pengguna')->label('Pengguna')->sortable()->searchable(),
                 TextColumn::make('keterangan')->limit(50),
             ])
-            ->actions([
-                Tables\Actions\DeleteAction::make(),
+            ->filters([
+                Filter::make('tanggal') // Filter untuk tanggal
+                    ->form([
+                        \Filament\Forms\Components\DatePicker::make('from')->label('Dari Tanggal'),
+                        \Filament\Forms\Components\DatePicker::make('to')->label('Sampai Tanggal'),
+                    ])
+                    ->query(function ($query, array $data) {
+                        return $query
+                            ->when($data['from'], fn ($q) => $q->where('tanggal', '>=', $data['from']))
+                            ->when($data['to'], fn ($q) => $q->where('tanggal', '<=', $data['to']));
+                    }),
             ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
-            ]);
+            ->defaultSort('tanggal', 'desc');
     }
 
     public static function getRelations(): array

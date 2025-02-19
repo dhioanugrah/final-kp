@@ -12,7 +12,9 @@
     use Filament\Forms\Components\Grid;
     use Filament\Forms\Components\TextEntry;
     use Filament\Forms\Components\Group;
-    use App\Filament\Resources\PrResource\RelationManagers\PrDetailsRelationManager;
+    use App\Filament\Resources\PrResource\RelationManagers\BarangRelationManager;
+    use App\Filament\Resources\PrResource\RelationManagers\BarangPengajuanRelationManager;
+
 
     use Filament\Tables\Table;
 
@@ -25,10 +27,11 @@
 
         protected static ?string $model = Pr::class;
 
-        public static function relationManagers(): array
+        public static function getRelations(): array
         {
             return [
-                PrDetailsRelationManager::class,
+                BarangRelationManager::class, // Pastikan RelationManager sudah didaftarkan
+                BarangPengajuanRelationmanager::class,
             ];
         }
 
@@ -59,7 +62,6 @@
                     Tables\Columns\TextColumn::make('request_by')->sortable(),
                 ])
                 ->actions([
-                    Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
 
                     Tables\Actions\Action::make('Tambah Barang')
@@ -84,7 +86,24 @@
                         Forms\Components\Select::make('kode_barang')
                             ->label('Kode Barang')
                             ->options(\App\Models\Barang::all()->pluck('kode_barang', 'kode_barang'))
-                            ->required(),
+                            ->required()
+                            ->reactive() // Memungkinkan perubahan nilai secara dinamis
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if ($state) {
+                                    $barang = \App\Models\Barang::where('kode_barang', $state)->first();
+                                    if ($barang) {
+                                        $set('barang_info', "{$barang->nama_barang} | {$barang->merk} | {$barang->ukuran} | {$barang->part_number}");
+                                    } else {
+                                        $set('barang_info', 'Data barang tidak ditemukan');
+                                    }
+                                }
+                            }),
+
+                        Forms\Components\TextInput::make('barang_info')
+                            ->label('Nama Barang | Merk | Ukuran | Part Number')
+                            ->disabled()
+                            ->live(), // Supaya selalu diperbarui ketika kode_barang berubah
+
                         Forms\Components\TextInput::make('jumlah_diajukan')
                             ->label('Jumlah Diajukan')
                             ->numeric()
@@ -93,23 +112,12 @@
 
 
 
-                    Tables\Actions\Action::make('detail')
-                        ->icon('heroicon-o-eye')
-                        ->modalHeading('Detail Barang PR')
-                        ->modalButton('Tutup')
-                        ->modalWidth('2xl')
-                        ->modalContent(fn ($record) => view('filament.tables.detail-pr', ['prDetails' => $record->prDetails])
-                ),
 
-                Tables\Actions\Action::make('Cek Pengajuan')
+                Tables\Actions\Action::make('Detail')
                 ->icon('heroicon-o-eye')
                 ->button()
                 ->color('primary')
                 ->url(fn ($record) => PrResource::getUrl('cek-pengajuan', ['record' => $record->id]))
-
-
-
-
                 ]);
         }
 
@@ -120,6 +128,7 @@
                 'create' => Pages\CreatePr::route('/create'),
                 'edit' => Pages\EditPr::route('/{record}/edit'),
                 'cek-pengajuan' => Pages\CekPengajuan::route('/{record}/cek-pengajuan'),
+                'cek-detail' => Pages\CekDetail::route('/{record}/cek-detail'),
 
             ];
         }

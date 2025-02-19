@@ -21,4 +21,11 @@ class PrDetail extends Model
         return $this->belongsTo(Pr::class, 'pr_id');
     }
 
+    public function penerimaan()
+    {
+        return $this->hasMany(\App\Models\PenerimaanBarang::class, 'pr_detail_id');
+    }
+
+
+
 }
