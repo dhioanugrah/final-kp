@@ -33,11 +33,26 @@ class MutasiBarangResource extends Resource
             ->required()
             ->reactive()
             ->afterStateUpdated(function ($state, callable $set) {
-                // Logic yang sama untuk meng-update informasi barang
-            }),
+                if ($state) {
+                    $barang = Barang::where('kode_barang', $state)->first();
+
+                    if ($barang) {
+                        $set('barang_info', "{$barang->nama_barang} | {$barang->merk} | {$barang->ukuran} | {$barang->part_number}");
+                        $set('max_stok', $barang->stok);
+                    } else {
+                        $set('barang_info', 'Barang tidak ditemukan');
+                        $set('max_stok', 0);
+                    }
+                } else {
+                    $set('barang_info', '');
+                    $set('max_stok', 0);
+                }
+            })
+            ,
 
             Forms\Components\TextInput::make('barang_info')
                 ->label('Nama Barang | Merk | Ukuran | Part Number')
+
                 ->disabled()
                 ->live(),
 

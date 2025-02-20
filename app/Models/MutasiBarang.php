@@ -49,35 +49,35 @@ class MutasiBarang extends Model
     public function cekStokSebelumMutasi()
     {
         $barang = Barang::where('kode_barang', $this->kode_barang)->first();
-    
+
         if (!$barang) {
             throw new \Exception("Barang dengan kode {$this->kode_barang} tidak ditemukan.");
         }
-    
+
         if ($this->jenis === 'output' && $this->jumlah > $barang->stok) {
             throw new \Exception("Stok barang tidak mencukupi.");
         }
-    
+
         return true;
     }
-    
+
 
 
     public function updateStokBarang()
     {
         $barang = Barang::where('kode_barang', $this->kode_barang)->first();
-    
+
         if (!$barang) {
             throw new \Exception("Barang dengan kode {$this->kode_barang} tidak ditemukan.");
         }
-    
+
         if ($this->jenis === 'input') {
             $barang->stok += $this->jumlah;
         } elseif ($this->jenis === 'output') {
             $barang->stok -= $this->jumlah;
         }
-    
+
         $barang->save();
     }
-    
+
 }

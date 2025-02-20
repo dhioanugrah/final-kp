@@ -62,7 +62,6 @@
                     Tables\Columns\TextColumn::make('request_by')->sortable(),
                 ])
                 ->actions([
-                    Tables\Actions\DeleteAction::make(),
 
                     Tables\Actions\Action::make('Tambah Barang')
                     ->icon('heroicon-o-plus-circle')
