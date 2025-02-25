@@ -37,13 +37,14 @@ class BarangResource extends Resource
     }
 
 
+
     public static function form(Form $form): Form
     {
         return $form->schema([
             Forms\Components\TextInput::make('kode_barang')
                 ->label('Kode Barang')
                 ->required()
-                ->unique()
+                ->unique(ignoreRecord: true)
                 ->maxLength(50),
 
             Forms\Components\TextInput::make('nama_barang')
@@ -71,11 +72,18 @@ class BarangResource extends Resource
             Forms\Components\TextInput::make('stok')
                 ->label('Stok')
                 ->numeric()
+                ->minValue(0)
                 ->required()
                 ->default(0),
+
+            Forms\Components\TextInput::make('min_stok')
+                ->label('Minimal Stok')
+                ->numeric()
+                ->minValue(0)
+                ->required()
+                ->default(5),
         ]);
     }
-
 
     public static function table(Tables\Table $table): Tables\Table
     {
@@ -87,7 +95,16 @@ class BarangResource extends Resource
                 Tables\Columns\TextColumn::make('ukuran')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('part_number')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('satuan'),
-                Tables\Columns\TextColumn::make('stok')->sortable(),
+                Tables\Columns\TextColumn::make('stok')
+                    ->sortable()
+                    ->label('Stok')
+                    ->badge()
+                    ->color(fn ($record) => $record->stok <= $record->min_stok ? 'danger' : 'success')
+                    ->formatStateUsing(fn ($record) => $record->stok <= $record->min_stok ? "{$record->stok} ⚠️" : $record->stok),
+
+                Tables\Columns\TextColumn::make('min_stok')
+                    ->label('Minimal Stok')
+                    ->sortable(),
             ])
             ->filters([
                 //
@@ -98,7 +115,10 @@ class BarangResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
-            ]);
+            ])
+            ->defaultSort(fn ($query) =>
+                $query->orderByRaw('(stok <= min_stok) DESC')->orderBy('stok', 'asc') // Menampilkan stok di bawah min_stok di atas
+            );
     }
 
     public static function getRelations(): array

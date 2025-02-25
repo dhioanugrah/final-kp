@@ -21,7 +21,8 @@ class Barang extends Model
         'ukuran',
         'part_number',
         'satuan',
-        'stok'
+        'stok',
+        'min_stok',
     ];
 
     public function prDetails()
