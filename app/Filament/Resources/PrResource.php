@@ -41,7 +41,7 @@
                 ->where('model_has_roles.model_id', $user->id)
                 ->value('roles.name');
 
-            return in_array($userRole, ['superadmin', 'checker_1', 'checker_2', 'direktur', 'warehouse', 'purchase']);
+            return in_array($userRole, ['superadmin','admin', 'checker_1', 'checker_2', 'direktur', 'warehouse', 'purchase']);
         }
 
 

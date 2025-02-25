@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
 {
@@ -29,7 +30,7 @@ class UserResource extends Resource
             ->where('model_has_roles.model_id', $user->id)
             ->value('roles.name');
 
-        return in_array($userRole, ['superadmin','direktur' ]);
+        return in_array($userRole, ['superadmin','admin','direktur' ]);
     }
 
     public static function form(Form $form): Form
@@ -46,26 +47,29 @@ class UserResource extends Resource
                 ->email()
                 ->unique(),
 
-            Forms\Components\TextInput::make('password')
-                ->label('Password')
-                ->required()
-                ->password(),
         ]);
     }
 
     public static function table(Table $table): Table
     {
-        return $table->columns([
-            Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
-            Tables\Columns\TextColumn::make('email')->sortable()->searchable(),
-        ])
-        ->actions([
-            Tables\Actions\EditAction::make(),
-            Tables\Actions\DeleteAction::make(),
-        ])
-        ->bulkActions([
-            Tables\Actions\DeleteBulkAction::make(),
-        ]);
+        return $table
+            ->query(
+                User::whereDoesntHave('roles', function ($query) {
+                    $query->where('name', 'superadmin');
+                })
+            )
+            ->columns([
+                Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('email')->sortable()->searchable(),
+
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
+            ]);
     }
 
     public static function getRelations(): array
