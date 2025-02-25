@@ -27,6 +27,25 @@
 
         protected static ?string $model = Pr::class;
 
+        public static function shouldRegisterNavigation(): bool
+        {
+            $user = auth()->user();
+
+            if (!$user) {
+                return false;
+            }
+
+            // Ambil role user dari tabel roles
+            $userRole = \DB::table('roles')
+                ->join('model_has_roles', 'roles.id', '=', 'model_has_roles.role_id')
+                ->where('model_has_roles.model_id', $user->id)
+                ->value('roles.name');
+
+            return in_array($userRole, ['admin', 'checker_1', 'checker_2', 'direktur', 'warehouse', 'purchase']);
+        }
+
+
+
         public static function getRelations(): array
         {
             return [
@@ -60,17 +79,86 @@
                     Tables\Columns\TextColumn::make('tanggal_diajukan')->sortable(),
                     Tables\Columns\TextColumn::make('required_for')->sortable(),
                     Tables\Columns\TextColumn::make('request_by')->sortable(),
+                    Tables\Columns\BadgeColumn::make('checker_1_status')
+                    ->label('Checker 1')
+                    ->getStateUsing(fn ($record) => $record->checker_1_status) // Ambil data terbaru dari record
+                    ->colors([
+                        'pending' => 'gray',
+                        'disetujui' => 'success',
+                        'ditolak' => 'danger',
+                    ]),
+
+                    Tables\Columns\BadgeColumn::make('checker_2_status')
+                        ->label('Checker 2')
+                        ->getStateUsing(fn ($record) => $record->checker_2_status)
+                        ->colors([
+                            'pending' => 'gray',
+                            'disetujui' => 'success',
+                            'ditolak' => 'danger',
+                        ]),
+
+                    Tables\Columns\BadgeColumn::make('direktur_status')
+                        ->label('Direktur')
+                        ->getStateUsing(fn ($record) => $record->direktur_status)
+                        ->colors([
+                            'pending' => 'gray',
+                            'disetujui' => 'success',
+                            'ditolak' => 'danger',
+                        ]),
+
                 ])
                 ->actions([
+
+                    Tables\Actions\Action::make('approval_checker_1')
+                    ->label('approved')
+                    ->hidden(fn () => !auth()->user()->hasRole('checker_1'))
+                    ->requiresConfirmation() // Tambahkan konfirmasi
+                    ->modalHeading('Konfirmasi Approval')
+                    ->modalDescription('Apakah kamu yakin ingin menyetujui PR ini?')
+                    ->modalButton('Ya, Setujui')
+                    ->action(function ($record) {
+                        $record->update(['checker_1_status' => 'disetujui']);
+                    })
+                    ->color('success'),
+
+                    Tables\Actions\Action::make('approval_checker_2')
+                    ->label('approved')
+                    ->hidden(fn () => !auth()->user()->hasRole('checker_2'))
+                    ->requiresConfirmation() // Tambahkan konfirmasi
+                    ->modalHeading('Konfirmasi Approval')
+                    ->modalDescription('Apakah kamu yakin ingin menyetujui PR ini?')
+                    ->modalButton('Ya, Setujui')
+                    ->action(function ($record) {
+                        $record->update(['checker_2_status' => 'disetujui']);
+                    })
+                    ->color('success'),
+
+                    Tables\Actions\Action::make('approval_direktur')
+                    ->label('approved')
+                    ->hidden(fn ($record) => !auth()->user()->hasRole('direktur') ||
+                    ($record->checker_1_status !== 'disetujui' && $record->checker_2_status !== 'disetujui'))
+                 // Direktur hanya bisa approve jika checker sudah setuju
+                    ->requiresConfirmation() // Tambahkan konfirmasi
+                    ->modalHeading('Konfirmasi Approval Direktur')
+                    ->modalDescription('Apakah kamu yakin ingin menyetujui PR ini sebagai Direktur?')
+                    ->modalButton('Ya, Setujui')
+                    ->action(function ($record) {
+                        $record->update(['direktur_status' => 'disetujui']);
+                    })
+                    ->color('success'),
+
+
 
                     Tables\Actions\Action::make('Tambah Barang')
                     ->icon('heroicon-o-plus-circle')
                     ->modalHeading('Tambah Barang ke PR')
                     ->modalButton('Simpan')
                     ->modalWidth('md')
-                    ->action(function ($record, $data) {
+                    ->hidden(fn () => !auth()->user()->hasRole('warehouse')) // ❗ Hanya tampil jika user role 'warehouse'
+                    ->disabled(fn (Pr $record) => $record->direktur_status === 'disetujui') // ✅ Cek langsung di model `Pr`
+                    ->action(function (Pr $record, $data) { // ✅ Gunakan Pr, bukan Model
                         \App\Models\PrDetail::create([
-                            'pr_id' => $record->id,
+                            'pr_id' => $record->id, // Pastikan ini sesuai dengan relasi yang benar
                             'kode_barang' => $data['kode_barang'],
                             'jumlah_diajukan' => $data['jumlah_diajukan'],
                         ]);
@@ -86,7 +174,7 @@
                             ->label('Kode Barang')
                             ->options(\App\Models\Barang::all()->pluck('kode_barang', 'kode_barang'))
                             ->required()
-                            ->reactive() // Memungkinkan perubahan nilai secara dinamis
+                            ->reactive()
                             ->afterStateUpdated(function ($state, callable $set) {
                                 if ($state) {
                                     $barang = \App\Models\Barang::where('kode_barang', $state)->first();
@@ -101,13 +189,15 @@
                         Forms\Components\TextInput::make('barang_info')
                             ->label('Nama Barang | Merk | Ukuran | Part Number')
                             ->disabled()
-                            ->live(), // Supaya selalu diperbarui ketika kode_barang berubah
+                            ->live(),
 
                         Forms\Components\TextInput::make('jumlah_diajukan')
                             ->label('Jumlah Diajukan')
                             ->numeric()
                             ->required(),
-                    ]),
+                        ]),
+
+
 
 
 

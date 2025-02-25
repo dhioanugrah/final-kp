@@ -9,7 +9,8 @@ class Pr extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['no_pr', 'tanggal_diajukan', 'required_for', 'request_by'];
+    protected $fillable = ['no_pr', 'tanggal_diajukan', 'required_for', 'request_by', 'checker_1_status', 'checker_2_status', 'direktur_status'];
+
 
 
     protected static function boot()

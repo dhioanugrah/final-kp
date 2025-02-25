@@ -19,6 +19,23 @@ class BarangResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-archive-box';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        // Ambil role user dari tabel roles
+        $userRole = \DB::table('roles')
+            ->join('model_has_roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->where('model_has_roles.model_id', $user->id)
+            ->value('roles.name');
+
+        return in_array($userRole, ['admin', 'warehouse', 'checker_1', 'checker_2', 'direktur', 'purchase']);
+    }
+
 
     public static function form(Form $form): Form
     {

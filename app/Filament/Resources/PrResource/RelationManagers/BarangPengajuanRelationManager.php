@@ -65,10 +65,8 @@ class BarangPengajuanRelationManager extends RelationManager
                             ->required(),
                     ])
                     ->action(function (Model $record, array $data) {
-                        // Hitung jumlah sisa sebelum menyimpan data baru
                         $jumlahSisa = $record->jumlah_diajukan - $record->penerimaan()->sum('jumlah_diterima');
 
-                        // Cek apakah barang sudah diterima sepenuhnya
                         if ($jumlahSisa <= 0) {
                             Notification::make()
                                 ->title('Semua barang sudah diterima!')
@@ -77,7 +75,6 @@ class BarangPengajuanRelationManager extends RelationManager
                             return;
                         }
 
-                        // Simpan penerimaan barang baru ke tabel penerimaan_barang
                         \App\Models\PenerimaanBarang::create([
                             'pr_detail_id' => $record->id,
                             'vendor' => $data['vendor'],
@@ -85,7 +82,6 @@ class BarangPengajuanRelationManager extends RelationManager
                             'tanggal_diterima' => $data['tanggal_diterima'],
                         ]);
 
-                        // ✅ Tambahkan jumlah_diterima ke stok barang
                         $barang = \App\Models\Barang::where('kode_barang', $record->kode_barang)->first();
                         if ($barang) {
                             $barang->increment('stok', $data['jumlah_diterima']);
@@ -96,20 +92,18 @@ class BarangPengajuanRelationManager extends RelationManager
                             ->success()
                             ->send();
                     })
+                    ->disabled(fn (Model $record) => ($record->jumlah_diajukan - $record->penerimaan()->sum('jumlah_diterima')) <= 0)
+                    ->hidden(fn () => !auth()->user()->hasRole('warehouse')), // ✅ Sembunyikan jika bukan warehouse
 
-                    // ✅ Menonaktifkan tombol jika semua barang sudah diterima
-                    ->disabled(fn (Model $record) => ($record->jumlah_diajukan - $record->penerimaan()->sum('jumlah_diterima')) <= 0),
-
-                    Action::make('Detail')
+                Action::make('Detail')
                     ->icon('heroicon-o-information-circle')
                     ->modalHeading('Detail Penerimaan Barang')
                     ->modalWidth('lg')
-                    ->modalSubmitAction(false) // ✅ Hapus tombol bawaan Filament
-                    ->modalCancelAction(false) // ✅ Hapus tombol Cancel
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
                     ->modalContent(fn (Model $record) => view('filament.modals.detail_barang', [
-                        'penerimaan' => $record->penerimaan // Ambil semua riwayat penerimaan
+                        'penerimaan' => $record->penerimaan
                     ])),
-
             ]);
     }
 }

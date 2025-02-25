@@ -22,6 +22,24 @@ class MutasiBarangResource extends Resource
     protected static ?string $pluralLabel = 'Mutasi Barang Keluar';
     protected static ?string $navigationLabel = 'Barang Keluar';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        // Ambil role user dari tabel roles
+        $userRole = \DB::table('roles')
+            ->join('model_has_roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->where('model_has_roles.model_id', $user->id)
+            ->value('roles.name');
+
+        return in_array($userRole, ['admin','warehouse' ]);
+    }
+
+
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form
