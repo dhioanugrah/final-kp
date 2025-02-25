@@ -36,7 +36,7 @@ class MutasiBarangResource extends Resource
             ->where('model_has_roles.model_id', $user->id)
             ->value('roles.name');
 
-        return in_array($userRole, ['admin','warehouse' ]);
+        return in_array($userRole, ['superadmin','warehouse' ]);
     }
 
 

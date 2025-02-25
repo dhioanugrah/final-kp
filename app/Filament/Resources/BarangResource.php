@@ -33,7 +33,7 @@ class BarangResource extends Resource
             ->where('model_has_roles.model_id', $user->id)
             ->value('roles.name');
 
-        return in_array($userRole, ['admin', 'warehouse', 'checker_1', 'checker_2', 'direktur', 'purchase']);
+        return in_array($userRole, ['superadmin', 'warehouse', 'checker_1', 'checker_2', 'direktur', 'purchase']);
     }
 
 

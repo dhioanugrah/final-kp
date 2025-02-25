@@ -15,6 +15,23 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
     protected static ?string $navigationIcon = 'heroicon-s-user';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        // Ambil role user dari tabel roles
+        $userRole = \DB::table('roles')
+            ->join('model_has_roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->where('model_has_roles.model_id', $user->id)
+            ->value('roles.name');
+
+        return in_array($userRole, ['superadmin','direktur' ]);
+    }
+
     public static function form(Form $form): Form
     {
         return $form->schema([
