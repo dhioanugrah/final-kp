@@ -40,6 +40,10 @@ class BarangMasukResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('prDetail.pr.no_pr')
+                    ->label('No PR')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('prDetail.kode_barang')
                     ->label('Kode Barang')
                     ->sortable()

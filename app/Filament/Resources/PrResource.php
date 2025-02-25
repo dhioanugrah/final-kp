@@ -155,7 +155,7 @@
                     ->modalHeading('Tambah Barang ke PR')
                     ->modalButton('Simpan')
                     ->modalWidth('md')
-                    ->hidden(fn () => !auth()->user()->hasRole('warehouse')) // ❗ Hanya tampil jika user role 'warehouse'
+                    ->hidden(fn () => !auth()->user()->hasRole(['warehouse','admin','superadmin'])) // ❗ Hanya tampil jika user role 'warehouse'
                     ->disabled(fn (Pr $record) => $record->direktur_status === 'disetujui') // ✅ Cek langsung di model `Pr`
                     ->action(function (Pr $record, $data) { // ✅ Gunakan Pr, bukan Model
                         \App\Models\PrDetail::create([

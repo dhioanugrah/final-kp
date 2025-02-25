@@ -26,9 +26,10 @@ class Pr extends Model
     {
         $lastPr = self::latest()->first();
         $lastNumber = $lastPr ? intval(substr($lastPr->no_pr, 2)) : 0;
-        $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        $newNumber = $lastNumber + 1; // Tanpa str_pad agar jadi A-1, A-2, dst.
         return 'A-' . $newNumber;
     }
+
 
     public function barang()
 {

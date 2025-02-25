@@ -93,7 +93,7 @@ class BarangPengajuanRelationManager extends RelationManager
                             ->send();
                     })
                     ->disabled(fn (Model $record) => ($record->jumlah_diajukan - $record->penerimaan()->sum('jumlah_diterima')) <= 0)
-                    ->hidden(fn () => !auth()->user()->hasRole('warehouse')), // ✅ Sembunyikan jika bukan warehouse
+                    ->hidden(fn () => !auth()->user()->hasRole(['warehouse','admin','superadmin'])), // ✅ Sembunyikan jika bukan warehouse
 
                 Action::make('Detail')
                     ->icon('heroicon-o-information-circle')

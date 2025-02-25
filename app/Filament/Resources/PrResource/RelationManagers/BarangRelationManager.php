@@ -60,7 +60,7 @@ class BarangRelationManager extends RelationManager
                         ->success()
                         ->send();
                 })
-                ->hidden(fn () => !auth()->user()->hasRole('warehouse'))
+                ->hidden(fn () => !auth()->user()->hasRole(['warehouse','admin','superadmin']))
                 ->disabled(fn (Model $record) => \DB::table('prs')
                 ->where('id', $record->pr_id) // Sesuaikan dengan foreign key yang menghubungkan `pr_details` dengan `prs`
                 ->value('direktur_status') === 'disetujui'),
@@ -82,7 +82,7 @@ class BarangRelationManager extends RelationManager
                         ->success()
                         ->send();
                 })
-                ->hidden(fn () => !auth()->user()->hasRole('warehouse'))
+                ->hidden(fn () => !auth()->user()->hasRole(['warehouse','admin','superadmin']))
                 ->disabled(fn (Model $record) => \DB::table('prs')
                     ->where('id', $record->pr_id) // Sesuaikan dengan foreign key yang menghubungkan `pr_details` dengan `prs`
                     ->value('direktur_status') === 'disetujui'),
