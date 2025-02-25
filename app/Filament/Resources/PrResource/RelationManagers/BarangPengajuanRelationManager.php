@@ -18,6 +18,10 @@ class BarangPengajuanRelationManager extends RelationManager
 {
     protected static string $relationship = 'prDetails';
     protected static ?string $title = 'Cek Pengajuan'; // Ubah judul tab
+    public static function getRelationName(): string
+    {
+        return 'prDetails';
+    }
 
 
     public function table(Tables\Table $table): Tables\Table

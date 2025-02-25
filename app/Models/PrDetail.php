@@ -23,7 +23,7 @@ class PrDetail extends Model
 
     public function penerimaan()
     {
-        return $this->hasMany(\App\Models\PenerimaanBarang::class, 'pr_detail_id');
+        return $this->hasMany(\App\Models\PenerimaanBarang::class, 'pr_detail_id', 'id');
     }
 
 

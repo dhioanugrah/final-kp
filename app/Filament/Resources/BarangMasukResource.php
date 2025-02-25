@@ -15,8 +15,8 @@ class BarangMasukResource extends Resource
     protected static ?string $model = PenerimaanBarang::class;
 
     protected static ?string $navigationIcon = 'heroicon-s-currency-dollar';
-    protected static ?string $navigationLabel = 'Riwayat Barang Masuk';
-    protected static ?string $pluralLabel = 'Riwayat Barang Masuk';
+    protected static ?string $navigationLabel = 'Barang Diterima';
+    protected static ?string $pluralLabel = 'Barang Diterima';
 
     public static function shouldRegisterNavigation(): bool
     {

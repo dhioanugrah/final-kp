@@ -18,6 +18,8 @@ class BarangResource extends Resource
     protected static ?string $model = Barang::class;
 
     protected static ?string $navigationIcon = 'heroicon-s-archive-box';
+    protected static ?string $navigationLabel = 'Stok Barang';
+    protected static ?string $pluralLabel = 'Stok Barang';
 
     public static function shouldRegisterNavigation(): bool
     {

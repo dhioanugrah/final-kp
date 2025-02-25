@@ -46,7 +46,8 @@
         {
             return [
                 BarangRelationManager::class, // Pastikan RelationManager sudah didaftarkan
-                BarangPengajuanRelationmanager::class,
+                BarangPengajuanRelationManager::class,
+
             ];
         }
 
@@ -71,6 +72,20 @@
         {
             return $table
                 ->columns([
+
+
+
+                    Tables\Columns\TextColumn::make('status_penerimaan')
+                    ->label('Status Penerimaan')
+                    ->getStateUsing(fn ($record) => $record->status_penerimaan)
+                    ->sortable(),
+
+
+
+
+
+
+
                     Tables\Columns\TextColumn::make('no_pr')->sortable()->searchable(),
                     Tables\Columns\TextColumn::make('tanggal_diajukan')->sortable(),
                     Tables\Columns\TextColumn::make('required_for')->sortable(),

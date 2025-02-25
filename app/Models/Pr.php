@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Pr extends Model
 {
@@ -45,5 +46,21 @@ public function prPengajuan()
 {
     return $this->hasMany(PrPengajuan::class, 'pr_id', 'id');
 }
+public function penerimaanBarang()
+{
+    return $this->hasMany(PenerimaanBarang::class, 'pr_id', 'id');
+}
+
+
+
+public function statusPenerimaan(): Attribute
+{
+    return Attribute::make(
+        get: fn () => $this->prDetails()
+            ->whereRaw('jumlah_diajukan > (SELECT COALESCE(SUM(jumlah_diterima), 0) FROM penerimaan_barang WHERE pr_detail_id = pr_details.id)')
+            ->exists() ? 'Belum Selesai' : 'Selesai'
+    );
+}
+
 
 }
