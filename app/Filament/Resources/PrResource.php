@@ -14,8 +14,6 @@
     use Filament\Forms\Components\Group;
     use App\Filament\Resources\PrResource\RelationManagers\BarangRelationManager;
     use App\Filament\Resources\PrResource\RelationManagers\BarangPengajuanRelationManager;
-
-
     use Filament\Tables\Table;
 
     class PrResource extends Resource
@@ -24,7 +22,6 @@
         protected static ?string $navigationIcon = 'heroicon-s-archive-box';
         protected static ?string $pluralLabel = 'Process Request'; // Nama di sidebar dan halaman
         protected static ?string $navigationLabel = 'Process Request'; // Nama di sidebar
-
         protected static ?string $model = Pr::class;
 
         public static function shouldRegisterNavigation(): bool
@@ -35,7 +32,6 @@
                 return false;
             }
 
-            // Ambil role user dari tabel roles
             $userRole = \DB::table('roles')
                 ->join('model_has_roles', 'roles.id', '=', 'model_has_roles.role_id')
                 ->where('model_has_roles.model_id', $user->id)
@@ -80,32 +76,19 @@
                     Tables\Columns\TextColumn::make('required_for')->sortable(),
                     Tables\Columns\TextColumn::make('request_by')->sortable(),
                     Tables\Columns\BadgeColumn::make('checker_1_status')
-                    ->label('Checker 1')
-                    ->getStateUsing(fn ($record) => $record->checker_1_status) // Ambil data terbaru dari record
-                    ->colors([
-                        'pending' => 'gray',
-                        'disetujui' => 'success',
-                        'ditolak' => 'danger',
-                    ]),
-
+                        ->label('Checker 1')
+                        ->formatStateUsing(fn ($record) => $record->checker_1_status)
+                        ->color(fn ($record) => $record->checker_1_status === 'pending' ? 'danger' : 'success'),
+                    
                     Tables\Columns\BadgeColumn::make('checker_2_status')
                         ->label('Checker 2')
-                        ->getStateUsing(fn ($record) => $record->checker_2_status)
-                        ->colors([
-                            'pending' => 'gray',
-                            'disetujui' => 'success',
-                            'ditolak' => 'danger',
-                        ]),
-
+                        ->formatStateUsing(fn ($record) => $record->checker_2_status)
+                        ->color(fn ($record) => $record->checker_2_status === 'pending' ? 'danger' : 'success'),
+    
                     Tables\Columns\BadgeColumn::make('direktur_status')
                         ->label('Direktur')
-                        ->getStateUsing(fn ($record) => $record->direktur_status)
-                        ->colors([
-                            'pending' => 'gray',
-                            'disetujui' => 'success',
-                            'ditolak' => 'danger',
-                        ]),
-
+                        ->formatStateUsing(fn ($record) => $record->direktur_status)
+                        ->color(fn ($record) => $record->direktur_status === 'pending' ? 'danger' : 'success'),
                 ])
 
                 ->actions([
