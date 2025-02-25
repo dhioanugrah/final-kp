@@ -79,12 +79,12 @@
                         ->label('Checker 1')
                         ->formatStateUsing(fn ($record) => $record->checker_1_status)
                         ->color(fn ($record) => $record->checker_1_status === 'pending' ? 'danger' : 'success'),
-                    
+
                     Tables\Columns\BadgeColumn::make('checker_2_status')
                         ->label('Checker 2')
                         ->formatStateUsing(fn ($record) => $record->checker_2_status)
                         ->color(fn ($record) => $record->checker_2_status === 'pending' ? 'danger' : 'success'),
-    
+
                     Tables\Columns\BadgeColumn::make('direktur_status')
                         ->label('Direktur')
                         ->formatStateUsing(fn ($record) => $record->direktur_status)
@@ -182,7 +182,11 @@
                         ]),
 
 
-
+                        Tables\Actions\Action::make('print')
+                        ->label('Print PDF')
+                        ->icon('heroicon-o-printer')
+                        ->url(fn ($record) => url("/pr/{$record->id}/print"))
+                        ->openUrlInNewTab(),
 
 
 

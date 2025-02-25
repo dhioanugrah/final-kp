@@ -6,7 +6,7 @@ use App\Filament\Resources\PrResource;
 use Illuminate\Http\Request;
 use App\Models\Barang;
 use App\Models\PrDetail;
-
+use App\Http\Controllers\PdfController;
 // Halaman Utama
 Route::get('/', function () {
     return view('welcome');
@@ -21,6 +21,9 @@ Route::get('/get-barang/{kode_barang}', function ($kode_barang) {
 
 // PrResource::routes(Filament::getCurrentPanel());
 
+
+
+Route::get('/pr/{id}/print', [PdfController::class, 'print'])->name('pr.print');
 
 
 
