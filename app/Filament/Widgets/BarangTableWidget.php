@@ -13,7 +13,7 @@ class BarangTableWidget extends BaseWidget
 
     protected function getTableHeading(): string
     {
-        return 'PR yang Sedang Diproses';
+        return 'PR on going';
     }
 
     public function table(Table $table): Table
@@ -28,13 +28,10 @@ class BarangTableWidget extends BaseWidget
                     })
             )
             ->columns([
-                Tables\Columns\TextColumn::make('no_pr')
-                    ->label('No PR')
-                    ->sortable()
-                    ->color('yellow-800'), // Ubah warna teks jadi kuning gelap
+                Tables\Columns\TextColumn::make('no_pr')->label('No PR')->sortable(),
             ])
             ->defaultSort('id', 'desc')
-            ->striped()
-            ->class(['bg-yellow-100']); // Tambahkan warna kuning ke tabel
+            ->striped();
     }
 }
+
