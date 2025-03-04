@@ -9,24 +9,23 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
-class BarangTableWidget extends BaseWidget
+class PrSudahDisetujuiWidget extends BaseWidget
 {
-    protected static ?int $sort = 1; // Urutan widget di dashboard
+    protected static ?int $sort = 2;
 
     protected function getTableHeading(): string
     {
-        return 'PR Sedang Diproses';
+        return 'PR Sudah Disetujui Direktur';
     }
 
     protected function getTableQuery(): Builder
     {
         return Pr::query()
-            ->where('direktur_status', 'disetujui') // Hanya yang sudah disetujui Direktur
-            ->whereHas('prDetails', function ($query) {
-                $query->whereRaw(
-                    '(SELECT COALESCE(SUM(jumlah_diterima), 0) FROM penerimaan_barang WHERE penerimaan_barang.pr_detail_id = pr_details.id) < pr_details.jumlah_diajukan'
-                );
-            }); // Masih dalam proses penerimaan
+            ->where('direktur_status', 'disetujui') // ✅ Hanya yang sudah disetujui Direktur
+            ->where(function ($query) {
+                $query->where('checker_1_status', 'disetujui')
+                      ->orWhere('checker_2_status', 'disetujui');
+            });
     }
 
     protected function getTableColumns(): array
@@ -37,9 +36,9 @@ class BarangTableWidget extends BaseWidget
         ];
     }
 
-    // ✅ Gunakan canView() untuk menyembunyikan tabel jika user tidak memiliki role yang diizinkan
+    // ✅ Gunakan `canView()` agar hanya role tertentu yang bisa melihat widget ini
     public static function canView(): bool
     {
-        return true;
+        return Auth::user()->hasRole(['purchase', 'admin', 'superadmin']);
     }
 }
