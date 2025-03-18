@@ -16,4 +16,10 @@ class PenerimaanBarang extends Model
     {
         return $this->belongsTo(PrDetail::class);
     }
+
+    public function penerimaan()
+{
+    return $this->hasMany(\App\Models\PenerimaanBarang::class, 'pr_id', 'id');
+}
+
 }
