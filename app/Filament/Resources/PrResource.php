@@ -14,6 +14,9 @@
     use Filament\Forms\Components\Group;
     use App\Filament\Resources\PrResource\RelationManagers\BarangRelationManager;
     use App\Filament\Resources\PrResource\RelationManagers\BarangPengajuanRelationManager;
+    use Filament\Tables\Filters\Filter;
+    use Filament\Forms\Components\DatePicker;
+    use Filament\Forms\Components\TextInput;
     use Filament\Tables\Table;
 
     class PrResource extends Resource
@@ -104,6 +107,19 @@
                         ->label('Direktur')
                         ->formatStateUsing(fn ($record) => $record->direktur_status)
                         ->color(fn ($record) => $record->direktur_status === 'pending' ? 'danger' : 'success'),
+                ])
+
+                ->filters([
+                    Filter::make('tanggal_diajukan')
+                        ->form([
+                            DatePicker::make('from')->label('Dari Tanggal'),
+                            DatePicker::make('to')->label('Sampai Tanggal'),
+                        ])
+                        ->query(function ($query, array $data) {
+                            return $query
+                                ->when($data['from'], fn ($query) => $query->whereDate('tanggal_diajukan', '>=', $data['from']))
+                                ->when($data['to'], fn ($query) => $query->whereDate('tanggal_diajukan', '<=', $data['to']));
+                        }),
                 ])
 
                 ->actions([

@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter; // Import Filter
 
@@ -117,18 +118,35 @@ class MutasiBarangResource extends Resource
                 TextColumn::make('keterangan')->limit(50),
             ])
             ->filters([
-                Filter::make('tanggal') // Filter untuk tanggal
-                    ->form([
-                        \Filament\Forms\Components\DatePicker::make('from')->label('Dari Tanggal'),
-                        \Filament\Forms\Components\DatePicker::make('to')->label('Sampai Tanggal'),
-                    ])
-                    ->query(function ($query, array $data) {
-                        return $query
-                            ->when($data['from'], fn ($q) => $q->where('tanggal', '>=', $data['from']))
-                            ->when($data['to'], fn ($q) => $q->where('tanggal', '<=', $data['to']));
-                    }),
+                Filter::make('tanggal')
+                ->form([
+                    \Filament\Forms\Components\DatePicker::make('from')->label('Dari Tanggal'),
+                    \Filament\Forms\Components\DatePicker::make('to')->label('Sampai Tanggal'),
+                ])
+                ->indicateUsing(function (array $data) {
+                    return $data['from'] || $data['to']
+                        ? 'Tanggal dipilih'
+                        : null;
+                })
+                ->query(function ($query, array $data) {
+                    return $query
+                        ->when($data['from'], fn ($q) => $q->where('tanggal', '>=', $data['from']))
+                        ->when($data['to'], fn ($q) => $q->where('tanggal', '<=', $data['to']));
+                })
             ])
-            ->defaultSort('tanggal', 'desc');
+            ->defaultSort('tanggal', 'desc')
+            ->headerActions([
+                Action::make('cetak_pdf')
+                    ->label('Cetak PDF')
+                    ->icon('heroicon-o-printer')
+                    ->url(fn () => route('barang.keluar.pdf', [
+                        'tableFilters' => request()->query('tableFilters'),
+                        'search' => request()->query('search'),
+                        'sort' => request()->query('sort'),
+                        'page' => request()->query('page'),
+                    ]))
+                    ->openUrlInNewTab(),
+            ]);
     }
 
     public static function getRelations(): array

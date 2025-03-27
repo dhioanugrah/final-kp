@@ -24,6 +24,8 @@ Route::get('/get-barang/{kode_barang}', function ($kode_barang) {
 
 
 Route::get('/pr/{id}/print', [PdfController::class, 'print'])->name('pr.print');
+Route::get('/barang/stok/pdf', [PdfController::class, 'printStokBarang'])->name('barang.stok.pdf');
+Route::get('/barang/keluar/pdf', [PdfController::class, 'PrintBarangKeluar'])->name('barang.keluar.pdf');
 
 
 

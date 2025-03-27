@@ -118,6 +118,13 @@ class BarangResource extends Resource
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
             ])
+            ->headerActions([
+                Tables\Actions\Action::make('Export PDF')
+                    ->label('Print PDF')
+                    ->url(fn () => route('barang.stok.pdf'))
+                    ->openUrlInNewTab()
+                    ->icon('heroicon-o-printer'),
+            ])
             ->defaultSort(fn ($query) =>
                 $query->orderByRaw('(stok <= min_stok) DESC')->orderBy('stok', 'asc') // Menampilkan stok di bawah min_stok di atas
             );
