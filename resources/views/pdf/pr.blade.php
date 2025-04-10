@@ -27,7 +27,7 @@
             <td><strong>Required Date:</strong> {{ $pr->required_date }}</td>
         </tr>
     </table>
-    
+
     <table>
         <thead>
             <tr>
@@ -47,6 +47,7 @@
                 <td>{{ $detail->barang->satuan ?? '-' }}</td>
                 <td>{{ $detail->required_for ?? '-' }}</td>
             </tr>
+
             @endforeach
         </tbody>
     </table>
@@ -73,10 +74,10 @@
             <td></td>
         </tr>
         <tr>
-            <td class="left-align">Name: {{ $pr->requested_by_name }}</td>
-            <td class="left-align">Name: {{ $pr->approved_by_1_name }}</td>
-            <td class="left-align">Name: {{ $pr->approved_by_2_name }}</td>
-            <td class="left-align">Name: {{ $pr->received_by_name }}</td>
+            <td class="left-align">Nama: {{ $pr->requested_by_name }}</td>
+            <td class="left-align">Nama: {{ $pr->approved_by_1_name }}</td>
+            <td class="left-align">Nama: {{ $pr->approved_by_2_name }}</td>
+            <td class="left-align">Nama: {{ $pr->received_by_name }}</td>
         </tr>
         <tr>
             <td class="left-align">Dept: {{ $pr->requested_by_dept }}</td>
