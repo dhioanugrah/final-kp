@@ -9,6 +9,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action as FormAction;
 
 class BarangMasukResource extends Resource
 {
@@ -84,9 +87,26 @@ class BarangMasukResource extends Resource
             ->filters([
                 Filter::make('tanggal_diterima')
                     ->form([
-                        \Filament\Forms\Components\DatePicker::make('from')->label('Dari Tanggal'),
-                        \Filament\Forms\Components\DatePicker::make('to')->label('Sampai Tanggal'),
+                        DatePicker::make('from')->label('Dari Tanggal'),
+                        DatePicker::make('to')->label('Sampai Tanggal'),
+
+                        // Tombol refresh manual
+                        Actions::make([
+                            FormAction::make('refreshPage')
+                                ->label('Terapkan Tanggal')
+                                ->color('gray')
+                                ->button()
+                                ->extraAttributes([
+                                    'x-data' => '{}',
+                                    'x-on:click' => 'window.location.reload()',
+                                ]),
+                        ]),
                     ])
+                    ->indicateUsing(function (array $data) {
+                        return $data['from'] || $data['to']
+                            ? 'Tanggal dipilih'
+                            : null;
+                    })
                     ->query(function ($query, array $data) {
                         return $query
                             ->when($data['from'], fn ($q) => $q->where('tanggal_diterima', '>=', $data['from']))
@@ -95,6 +115,7 @@ class BarangMasukResource extends Resource
             ])
             ->defaultSort('tanggal_diterima', 'desc');
     }
+
 
     public static function getPages(): array
     {

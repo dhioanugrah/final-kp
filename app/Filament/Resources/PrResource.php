@@ -114,7 +114,23 @@
                         ->form([
                             DatePicker::make('from')->label('Dari Tanggal'),
                             DatePicker::make('to')->label('Sampai Tanggal'),
+
+                            \Filament\Forms\Components\Actions::make([
+                                \Filament\Forms\Components\Actions\Action::make('refreshPage')
+                                    ->label('Terapkan Tanggal')
+                                    ->color('gray')
+                                    ->button()
+                                    ->extraAttributes([
+                                        'x-data' => '{}',
+                                        'x-on:click' => 'window.location.reload()',
+                                    ]),
+                            ]),
                         ])
+                        ->indicateUsing(function (array $data) {
+                            return $data['from'] || $data['to']
+                                ? 'Tanggal dipilih'
+                                : null;
+                        })
                         ->query(function ($query, array $data) {
                             return $query
                                 ->when($data['from'], fn ($query) => $query->whereDate('tanggal_diajukan', '>=', $data['from']))

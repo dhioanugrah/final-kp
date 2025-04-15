@@ -45,10 +45,40 @@ class UserResource extends Resource
                 ->label('Email')
                 ->required()
                 ->email()
-                ->unique(),
+                ->unique(ignoreRecord: true), // Supaya nggak error saat update
+
+                Forms\Components\TextInput::make('raw_password')
+                ->label('Password Saat Ini')
+                ->disabled()
+                ->dehydrated(false),
+
+                Forms\Components\TextInput::make('new_password')
+                ->label('Password Baru')
+                ->password()
+                ->maxLength(255)
+                ->dehydrated(false) // supaya field ini gak langsung dikirim ke DB
+                ->default(null)
+                ->live(onBlur: true)
+                ->extraAttributes(['autocomplete' => 'new-password'])
+                ->afterStateUpdated(function ($state, callable $set) {
+                    if (!empty($state)) {
+                        $set('password', bcrypt($state));
+                        $set('raw_password', $state); // 👈 ini menyimpan password asli ke kolom
+                    }
+                })
+                ->required(fn (string $context): bool => $context === 'create'),
+
+
+
+
+                Forms\Components\Hidden::make('password'),
+                Forms\Components\Hidden::make('raw_password'),
+
+
 
         ]);
     }
+
 
     public static function table(Table $table): Table
     {
@@ -61,6 +91,9 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('email')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('raw_password')
+                ->label('Password')
+                ->copyable() // Optional: biar bisa dicopy\
 
             ])
             ->actions([

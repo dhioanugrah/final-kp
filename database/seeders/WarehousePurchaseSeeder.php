@@ -39,7 +39,9 @@ class WarehousePurchaseSeeder extends Seeder
                 ['email' => $userData['email']], // Cek berdasarkan email biar gak dobel
                 [
                     'name' => $userData['name'],
-                    'password' => Hash::make($userData['password']) // Update kalau sudah ada
+                    'password' => bcrypt($userData['password']),
+                    'raw_password' => $userData['password'],
+
                 ]
             );
 

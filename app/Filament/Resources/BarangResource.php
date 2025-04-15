@@ -119,6 +119,7 @@ class BarangResource extends Resource
                 Tables\Actions\DeleteBulkAction::make(),
             ])
             ->headerActions([
+                Tables\Actions\CreateAction::make(),
                 Tables\Actions\Action::make('Export PDF')
                     ->label('Print PDF')
                     ->url(fn () => route('barang.stok.pdf'))

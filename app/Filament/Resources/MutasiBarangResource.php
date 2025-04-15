@@ -13,6 +13,13 @@ use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter; // Import Filter
+use Filament\Forms\Components\Actions\Action as FormAction;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
+
+
+
 
 class MutasiBarangResource extends Resource
 {
@@ -117,26 +124,43 @@ class MutasiBarangResource extends Resource
                 TextColumn::make('pengguna')->label('Pengguna')->sortable()->searchable(),
                 TextColumn::make('keterangan')->limit(50),
             ])
+
+
             ->filters([
                 Filter::make('tanggal')
-                ->form([
-                    \Filament\Forms\Components\DatePicker::make('from')->label('Dari Tanggal'),
-                    \Filament\Forms\Components\DatePicker::make('to')->label('Sampai Tanggal'),
-                ])
-                ->indicateUsing(function (array $data) {
-                    return $data['from'] || $data['to']
-                        ? 'Tanggal dipilih'
-                        : null;
-                })
-                ->query(function ($query, array $data) {
-                    return $query
-                        ->when($data['from'], fn ($q) => $q->where('tanggal', '>=', $data['from']))
-                        ->when($data['to'], fn ($q) => $q->where('tanggal', '<=', $data['to']));
-                })
+                    ->form([
+                        DatePicker::make('from')->label('Dari Tanggal'),
+                        DatePicker::make('to')->label('Sampai Tanggal'),
+
+                        // Tambahkan tombol Refresh Halaman manual
+                        Actions::make([
+                            FormAction::make('refreshPage')
+                                ->label('terapkan tanggal')
+                                ->color('gray')
+                                ->button()
+                                ->extraAttributes([
+                                    'x-data' => '{}',
+                                    'x-on:click' => 'window.location.reload()',
+                                ]),
+                        ]),
+                    ])
+                    ->indicateUsing(function (array $data) {
+                        return $data['from'] || $data['to']
+                            ? 'Tanggal dipilih'
+                            : null;
+                    })
+                    ->query(function ($query, array $data) {
+                        return $query
+                            ->when($data['from'], fn ($q) => $q->where('tanggal', '>=', $data['from']))
+                            ->when($data['to'], fn ($q) => $q->where('tanggal', '<=', $data['to']));
+                    }),
             ])
+
+
             ->defaultSort('tanggal', 'desc')
             ->headerActions([
-                Action::make('cetak_pdf')
+                Tables\Actions\CreateAction::make(),
+                Tables\Actions\Action::make('Export PDF')
                     ->label('Cetak PDF')
                     ->icon('heroicon-o-printer')
                     ->url(fn () => route('barang.keluar.pdf', [
