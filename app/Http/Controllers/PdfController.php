@@ -11,6 +11,8 @@ use Illuminate\Routing\Controller;
 
 class PdfController extends Controller
 {
+
+
     // Cetak PDF untuk PR (Process Request)
     public function print($id)
     {

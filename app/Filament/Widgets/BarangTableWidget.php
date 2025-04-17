@@ -32,10 +32,27 @@ class BarangTableWidget extends BaseWidget
     protected function getTableColumns(): array
     {
         return [
-            Tables\Columns\TextColumn::make('no_pr')->label('No PR')->sortable(),
-            Tables\Columns\TextColumn::make('created_at')->label('Tanggal Pengajuan')->date(),
+            Tables\Columns\TextColumn::make('no_pr')
+                ->label('No PR')
+                ->sortable()
+                ->url(fn ($record) => \App\Filament\Resources\PrResource::getUrl('cek-pengajuan', ['record' => $record->id])), // ini link ke detail PR
+
+            Tables\Columns\TextColumn::make('created_at')
+                ->label('Tanggal Pengajuan')
+                ->date(),
         ];
     }
+
+    protected function getTableActions(): array
+{
+    return [
+        Tables\Actions\Action::make('Detail')
+            ->label('Lihat Detail')
+            ->icon('heroicon-o-eye')
+            ->url(fn ($record) => \App\Filament\Resources\PrResource::getUrl('cek-pengajuan', ['record' => $record->id])),
+    ];
+}
+
 
     // ✅ Gunakan canView() untuk menyembunyikan tabel jika user tidak memiliki role yang diizinkan
     public static function canView(): bool
